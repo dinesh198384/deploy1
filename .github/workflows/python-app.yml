@@ -2,19 +2,15 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Python application
-
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   build:
-
-    runs-on: ubuntu-latest
-
-    steps:
+   runs-on: ubuntu-latest
+   steps:
     - uses: actions/checkout@v2
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
@@ -25,9 +21,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install flake8 pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    -  name: Build and Push Docker Images
-       run: |
+    - name: Build and Push Docker Images
+      run: |
            docker build . --file ./sendresults/Dockerfile -t deploy1-repo:latest
+           docker build . --file ./sendresults2/Dockerfile -t deploy2-repo:latest
+           docker build . --file ./sendresults3/Dockerfile -t deploy3-repo:latest
        
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v1
@@ -45,3 +43,19 @@ jobs:
         file: sendresults/Dockerfile
         push: true
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/deploy1-repo:latest
+    - name: Build and push
+      id: docker_build2
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: sendresults2/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/deploy2-repo:latest
+    - name: Build and push
+      id: docker_build3
+      uses: docker/build-push-action@v2
+      with:
+        context: ./
+        file: sendresults3/Dockerfile
+        push: true
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/deploy3-repo:latest
